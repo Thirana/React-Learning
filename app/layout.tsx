@@ -4,6 +4,8 @@ import "./globals.css";
 
 import { ThemeProvider } from "@/components/theme-provider";
 import { ModeToggle } from "@/components/mode-toggler";
+import Sidebar from "@/components/dashboard/common/Sidebar";
+import Navbar from "@/components/dashboard/common/Navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased flex`}
       >
         <ThemeProvider
             attribute="class"
@@ -36,8 +38,11 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <ModeToggle/>
-            {children}
+            <Sidebar/>
+            <main className="w-full">
+              <Navbar/>
+              <div className="px-4">{children}</div>
+            </main>
           </ThemeProvider>
       </body>
     </html>
