@@ -5,7 +5,7 @@ import './globals.css'
 import { ThemeProvider } from '@/components/theme-provider'
 import Navbar from '@/components/dashboard/common/Navbar'
 import { SidebarProvider } from '@/components/ui/sidebar'
-import AppSidebar from '@/components/dashboard/common/Sidebar'
+import AppSidebar from '@/components/dashboard/sidebar/AppSidebar'
 
 const geistSans = Geist({
     variable: '--font-geist-sans',
