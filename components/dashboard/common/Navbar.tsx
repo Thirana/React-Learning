@@ -1,5 +1,6 @@
 import { ModeToggle } from '@/components/mode-toggler'
 import Link from 'next/link'
+import UserProfileIcon from '@/components/dashboard/UserProfileIcon'
 
 const Navbar = () => {
     return (
@@ -7,10 +8,12 @@ const Navbar = () => {
             {/*LEFT*/}
             collapsbutton
             {/*LEFT*/}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-8">
                 <Link href="/">Dashboard</Link>
 
                 <ModeToggle />
+
+                <UserProfileIcon />
             </div>
         </nav>
     )
