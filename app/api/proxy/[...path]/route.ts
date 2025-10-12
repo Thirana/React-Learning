@@ -2,57 +2,63 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const BACKEND_URL = 'http://localhost:3010'
 
+//  Notice that `params` must now be awaited (it's a Promise)
 export async function GET(
     request: NextRequest,
-    { params }: { params: { path: string[] } }
+    context: { params: Promise<{ path: string[] }> }
 ) {
-    return handleRequest(request, params, 'GET')
+    const { path } = await context.params
+    return handleRequest(request, path, 'GET')
 }
 
 export async function POST(
     request: NextRequest,
-    { params }: { params: { path: string[] } }
+    context: { params: Promise<{ path: string[] }> }
 ) {
-    return handleRequest(request, params, 'POST')
+    const { path } = await context.params
+    return handleRequest(request, path, 'POST')
 }
 
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { path: string[] } }
+    context: { params: Promise<{ path: string[] }> }
 ) {
-    return handleRequest(request, params, 'PUT')
+    const { path } = await context.params
+    return handleRequest(request, path, 'PUT')
 }
 
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { path: string[] } }
+    context: { params: Promise<{ path: string[] }> }
 ) {
-    return handleRequest(request, params, 'DELETE')
+    const { path } = await context.params
+    return handleRequest(request, path, 'DELETE')
 }
 
 export async function PATCH(
     request: NextRequest,
-    { params }: { params: { path: string[] } }
+    context: { params: Promise<{ path: string[] }> }
 ) {
-    return handleRequest(request, params, 'PATCH')
+    const { path } = await context.params
+    return handleRequest(request, path, 'PATCH')
 }
 
+// Now this helper receives plain `path` (string[])
 async function handleRequest(
     request: NextRequest,
-    params: { path: string[] },
+    path: string[],
     method: string
 ) {
     try {
-        // Reconstruct the path from the dynamic route
-        const path = params.path.join('/')
-        const url = `${BACKEND_URL}/${path}`
+        // Reconstruct full URL
+        const url = `${BACKEND_URL}/${path.join('/')}`
 
-        // Get query parameters from the request
+        // Add query params if any
         const searchParams = request.nextUrl.searchParams
         const queryString = searchParams.toString()
         const fullUrl = queryString ? `${url}?${queryString}` : url
 
-        // Get request body for POST, PUT, PATCH requests
+        // Read body if method allows it
         let body = undefined
         if (['POST', 'PUT', 'PATCH'].includes(method)) {
             try {
@@ -62,7 +68,7 @@ async function handleRequest(
             }
         }
 
-        // Forward headers (excluding host and other Next.js specific headers)
+        // Forward headers (exclude internal)
         const headers: Record<string, string> = {}
         request.headers.forEach((value, key) => {
             if (
@@ -72,19 +78,22 @@ async function handleRequest(
             }
         })
 
+        // 🔁 Forward the request to backend
         const response = await fetch(fullUrl, {
             method,
             headers,
             body: body || undefined,
         })
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`)
+        // ✅ Return JSON response back to client
+        const contentType = response.headers.get('content-type')
+        let data
+        if (contentType && contentType.includes('application/json')) {
+            data = await response.json()
+        } else {
+            data = await response.text()
         }
 
-        const data = await response.json()
-
-        // Forward response headers
         const responseHeaders = new Headers()
         response.headers.forEach((value, key) => {
             responseHeaders.set(key, value)
